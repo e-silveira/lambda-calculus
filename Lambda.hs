@@ -2,7 +2,7 @@ module Lambda where
 
 data Expression = Variable Char
                 | Abstraction Char Expression
-                | Application Expression Expression deriving Show
+                | Application Expression Expression deriving (Show, Eq)
 
 freeVariables :: Expression -> [Char]
 freeVariables (Variable x) = [x]
