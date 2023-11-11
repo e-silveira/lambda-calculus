@@ -1,8 +1,6 @@
 module Lambda where
 
 import Data.List ( (\\) )
-import Distribution.Backpack.ConfiguredComponent (toConfiguredComponent)
-import Distribution.Simple.Setup (testOptions')
 
 data Expression = Variable Char
                 | Abstraction Char Expression
