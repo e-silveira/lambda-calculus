@@ -34,8 +34,7 @@ substitute name to from@(Application s t) =
 
 alphaConversion :: Expression -> [Char] -> Expression
 alphaConversion t@(Abstraction name _) available =
-    alphaConversion' t name to
-    where to = head $ available \\ boundVariables t
+    alphaConversion' t name $ head available
 
 alphaConversion' :: Expression -> Char -> Char -> Expression
 alphaConversion' (Variable name) from to = 
