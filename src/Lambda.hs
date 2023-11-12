@@ -8,15 +8,15 @@ data LamExp
   | LamApp LamExp LamExp
   deriving (Show, Eq)
 
-freeLamVars :: LamExp -> [Char]
-freeLamVars (LamVar name) = [name]
-freeLamVars (LamAbs name t) = freeLamVars t \\ [name]
-freeLamVars (LamApp s t) = freeLamVars s ++ freeLamVars t
+freeVariables :: LamExp -> [Char]
+freeVariables (LamVar name) = [name]
+freeVariables (LamAbs name t) = freeVariables t \\ [name]
+freeVariables (LamApp s t) = freeVariables s ++ freeVariables t
 
-boundLamVars :: LamExp -> [Char]
-boundLamVars (LamVar _) = []
-boundLamVars (LamAbs name t) = name : boundLamVars t
-boundLamVars (LamApp s t) = boundLamVars s ++ boundLamVars t
+boundVariables :: LamExp -> [Char]
+boundVariables (LamVar _) = []
+boundVariables (LamAbs name t) = name : boundVariables t
+boundVariables (LamApp s t) = boundVariables s ++ boundVariables t
 
 substitute :: Char -> LamExp -> LamExp -> LamExp
 substitute name to from@(LamVar name') =
@@ -28,9 +28,9 @@ substitute name to from@(LamAbs name' t)
   | name' `notElem` fvTo = LamAbs name' $ substitute name to t
   | otherwise = substitute name to from'
   where
-    fvTo = freeLamVars to
-    conflicting = [x | x <- ['a' ..], x `notElem` fvTo ++ boundLamVars from]
-    from' = alphaConversion from conflicting
+    fvTo = freeVariables to
+    available = [x | x <- ['a' ..], x `notElem` fvTo ++ boundVariables from]
+    from' = alphaConversion from available
 substitute name to from@(LamApp s t) = LamApp s' t'
   where
     s' = substitute name to s
@@ -58,7 +58,8 @@ alphaConversion' (LamApp s t) from to = LamApp s' t'
 
 isValue :: LamExp -> Bool
 isValue (LamAbs _ _) = True
-isValue _ = False
+isValue (LamVar _) = True
+isValue (LamApp _ _) = False
 
 eval :: LamExp -> LamExp
 eval (LamApp s t) = evalLamApp s t
