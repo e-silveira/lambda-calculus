@@ -16,25 +16,25 @@ import Lambda
 	')'    { TokenCB }
 
 %right '.'
+%nonassoc lambda var '(' ')'
 %left APP
-
 %%
 
-LamExp 
-	: var                       { LamVar $1 }
-	| lambda var  '.' LamExp       { LamAbs $2 $4}
-	| LamExp LamExp  %prec APP  { LamApp $1 $2 }
-	| '(' LamExp ')'            { $2 }
+Term 
+	: lambda var '.' Term   { LamAbs $2 $4}
+	| Term Term %prec APP { LamApp $1 $2 }
+	| '(' Term ')'          { $2 }
+	| var                     { LamVar $1 }
 
 {
 
 parseError :: [Token] -> a
 parseError b = error "Parse Error"
 
--- data LamExp
+-- data Term
 --   = LamVar Char
---   | LamAbs Char LamExp
---   | LamApp LamExp LamExp
+--   | LamAbs Char Term
+--   | LamApp Term Term
 --   deriving (Show, Eq)
 
 data Token 

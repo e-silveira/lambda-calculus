@@ -17,4 +17,4 @@ eval' = putStrLn . toString . eval . parserlamb . lexer
 main :: IO ()
 main = do
   input <- read'
-  unless (input == ":quit") $ eval' input >> main
+  unless (input == ":q") $ eval' input >> main
