@@ -59,18 +59,19 @@ alphaConversion' (LamApp s t) from to = LamApp s' t'
 isValue :: LamExp -> Bool
 isValue (LamAbs _ _) = True
 isValue (LamVar _) = True
-isValue (LamApp _ _) = False
+isValue _ = False
+
+eval' :: LamExp -> LamExp
+eval' (LamApp (LamAbs x t12) t2) = if isValue t2
+                                  then substitute x t2 t12
+                                  else let t2' = eval' t2
+                                       in LamApp (LamAbs x t12) t2'
+eval' (LamApp t1 t2) = let t1' = eval' t1
+                        in LamApp t1' t2
+eval' t = t
 
 eval :: LamExp -> LamExp
-eval (LamApp s t) = evalLamApp s t
-eval t = t
-
-evalLamApp :: LamExp -> LamExp -> LamExp
-evalLamApp s@(LamAbs var s') t =
-  if isValue t
-    then substitute var t s'
-    else LamApp s (eval t)
-evalLamApp s t = LamApp (eval s) t
+eval t = if t == eval' t then t else eval (eval' t)
 
 toString :: LamExp -> String
 toString (LamVar name) = [name]
