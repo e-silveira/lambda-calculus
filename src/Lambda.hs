@@ -110,6 +110,40 @@ restoreNames (BruijnLamAbs t) gamma =
   where name = head $ ['a'..] \\ gamma 
 restoreNames (BruijnLamApp s t) gamma = LamApp (restoreNames s gamma) (restoreNames t gamma)
 
+shift :: BruijnLamExp -> Int -> Int -> BruijnLamExp
+shift t@(BruijnLamVar num) d cutoff = BruijnLamVar $ if num >= cutoff then num + d else num
+shift (BruijnLamAbs t) d cutoff = BruijnLamAbs $ shift t d (cutoff + 1)
+shift (BruijnLamApp s t) d cutoff = BruijnLamApp (shift s d cutoff) (shift t d cutoff)
+
+-- Usar BruijnLamVar ou Int?
+substituteBruijn :: BruijnLamExp -> BruijnLamExp -> BruijnLamExp -> BruijnLamExp
+substituteBruijn orig@(BruijnLamVar k) (BruijnLamVar j) by = if k == j then by else orig
+substituteBruijn (BruijnLamAbs t) (BruijnLamVar j) by =
+  BruijnLamAbs $ substituteBruijn t (BruijnLamVar $ j + 1) (shift by 1 0)
+substituteBruijn (BruijnLamApp s t) j by =
+  BruijnLamApp (substituteBruijn s j by) (substituteBruijn t j by)
+
+isValueBruijn :: BruijnLamExp -> Bool
+isValueBruijn (BruijnLamVar _) = True
+isValueBruijn (BruijnLamAbs _) = True
+isValueBruijn (BruijnLamApp _ _) = False
+
+evalBruijn' :: BruijnLamExp -> BruijnLamExp
+evalBruijn' (BruijnLamApp (BruijnLamAbs t12) t2) = 
+  if isValueBruijn t2
+    then shift (substituteBruijn t12 (BruijnLamVar 0) (shift t2 1 0)) (-1) 0
+    else let t2' = evalBruijn' t2 in BruijnLamApp (BruijnLamAbs t12) t2'
+evalBruijn' (BruijnLamApp t1 t2) = let t1' = evalBruijn' t1 in BruijnLamApp t1' t2
+evalBruijn' t = t
+
+evalBruijn :: BruijnLamExp -> BruijnLamExp
+evalBruijn t = if t == evalBruijn' t then t else evalBruijn (evalBruijn' t)
+
+evalWithBruijn :: LamExp -> LamExp
+evalWithBruijn t = 
+  restoreNames (evalBruijn $ removeNames t gamma) gamma
+  where gamma = freeVariables t
+
 data BruijnLamExp
   = BruijnLamVar Int
   | BruijnLamAbs BruijnLamExp
