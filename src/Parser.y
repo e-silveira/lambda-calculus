@@ -2,7 +2,6 @@
 module Parser where
 import Data.Char
 import Lambda
-import Library
 }
 
 %name parserlamb
@@ -11,29 +10,21 @@ import Library
 
 %token
 	lambda { TokenLam }
-	true   { TokenTrue }
-	false  { TokenFalse }
-	and    { TokenAnd }
-	or     { TokenOr }
 	var    { TokenVar $$ }
 	'.'    { TokenPoint }
 	'('    { TokenOB }
 	')'    { TokenCB }
 
 %right '.'
-%nonassoc lambda var '(' ')' true false and or
+%nonassoc lambda var '(' ')'
 %left APP
 %%
 
 Term 
-	: lambda var '.' Term   { LamAbs $2 $4}
-	| Term Term %prec APP   { LamApp $1 $2 }
+	: lambda var '.' Term   { Abs $2 $4}
+	| Term Term %prec APP   { App $1 $2 }
 	| '(' Term ')'          { $2 }
-	| true                  { true }
-	| false                 { false }
-	| and                   { Library.and }
-	| or                    { Library.or }
-	| var                   { LamVar $1 }
+	| var                   { Var $1 }
 {
 
 parseError :: [Token] -> a
@@ -50,11 +41,7 @@ data Token
 	| TokenPoint
 	| TokenOB
 	| TokenCB
-	| TokenLam 
-	| TokenTrue
-	| TokenFalse
-	| TokenAnd
-	| TokenOr
+	| TokenLam
 	deriving Show
 
 lexer :: String -> [Token]
@@ -69,10 +56,6 @@ lexer (c:cs)
 lexWord :: String -> [Token]
 lexWord (c:cs)
 	| a == "lambda" = TokenLam : lexer rest
-	| a == "true"   = TokenTrue : lexer rest
-	| a == "false"  = TokenFalse : lexer rest
-	| a == "and"    = TokenAnd : lexer rest
-	| a == "or"     = TokenOr : lexer rest
 	| otherwise     = TokenVar c : lexer rest
 	where (a, rest) = span isAlpha (c:cs)
 -- lexer :: String -> [Token]

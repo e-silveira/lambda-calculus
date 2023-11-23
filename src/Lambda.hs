@@ -2,79 +2,79 @@ module Lambda where
 
 import Data.List ((\\), elemIndex)
 
-data LamExp
-  = LamVar Char
-  | LamAbs Char LamExp
-  | LamApp LamExp LamExp
+data Exp
+  = Var Char
+  | Abs Char Exp
+  | App Exp Exp
   deriving (Eq)
 
-instance Show LamExp where
-  show :: LamExp -> String
-  show (LamVar name) = [name]
-  show (LamAbs name t) = "(λ " ++ [name] ++ " . " ++ show t ++ ")"
-  show (LamApp s t) = "(" ++ show s ++ " " ++ show t ++ ")"
+instance Show Exp where
+  show :: Exp -> String
+  show (Var name) = [name]
+  show (Abs name t) = "(λ " ++ [name] ++ " . " ++ show t ++ ")"
+  show (App s t) = "(" ++ show s ++ " " ++ show t ++ ")"
 
-freeVariables :: LamExp -> [Char]
-freeVariables (LamVar name) = [name]
-freeVariables (LamAbs name t) = freeVariables t \\ [name]
-freeVariables (LamApp s t) = freeVariables s ++ freeVariables t
+freeVariables :: Exp -> [Char]
+freeVariables (Var name) = [name]
+freeVariables (Abs name t) = freeVariables t \\ [name]
+freeVariables (App s t) = freeVariables s ++ freeVariables t
 
-boundVariables :: LamExp -> [Char]
-boundVariables (LamVar _) = []
-boundVariables (LamAbs name t) = name : boundVariables t
-boundVariables (LamApp s t) = boundVariables s ++ boundVariables t
+boundVariables :: Exp -> [Char]
+boundVariables (Var _) = []
+boundVariables (Abs name t) = name : boundVariables t
+boundVariables (App s t) = boundVariables s ++ boundVariables t
 
-substitute :: Char -> LamExp -> LamExp -> LamExp
-substitute name to from@(LamVar name') =
+substitute :: Char -> Exp -> Exp -> Exp
+substitute name to from@(Var name') =
   if name == name'
     then to
     else from
-substitute name to from@(LamAbs name' t)
+substitute name to from@(Abs name' t)
   | name == name' = from
-  | name' `notElem` fvTo = LamAbs name' $ substitute name to t
+  | name' `notElem` fvTo = Abs name' $ substitute name to t
   | otherwise = substitute name to from'
   where
     fvTo = freeVariables to
     available = [x | x <- ['a' ..], x `notElem` fvTo ++ boundVariables from]
     from' = alphaConversion from available
-substitute name to from@(LamApp s t) = LamApp s' t'
+substitute name to from@(App s t) = App s' t'
   where
     s' = substitute name to s
     t' = substitute name to t
 
-alphaConversion :: LamExp -> [Char] -> LamExp
-alphaConversion t@(LamAbs name _) available =
+alphaConversion :: Exp -> [Char] -> Exp
+alphaConversion t@(Abs name _) available =
   alphaConversion' t name $ head available
 
-alphaConversion' :: LamExp -> Char -> Char -> LamExp
-alphaConversion' (LamVar name) from to =
+alphaConversion' :: Exp -> Char -> Char -> Exp
+alphaConversion' (Var name) from to =
   if name == from
-    then LamVar to
-    else LamVar name
-alphaConversion' (LamAbs name t) from to =
+    then Var to
+    else Var name
+alphaConversion' (Abs name t) from to =
   if name == from
-    then LamAbs to t'
-    else LamAbs name t'
+    then Abs to t'
+    else Abs name t'
   where
     t' = alphaConversion' t from to
-alphaConversion' (LamApp s t) from to = LamApp s' t'
+alphaConversion' (App s t) from to = App s' t'
   where
     s' = alphaConversion' s from to
     t' = alphaConversion' t from to
 
-isValue :: LamExp -> Bool
-isValue (LamAbs _ _) = True
-isValue (LamVar _) = True
+isValue :: Exp -> Bool
+isValue (Abs _ _) = True
+isValue (Var _) = True
 isValue _ = False
 
-eval' :: LamExp -> LamExp
-eval' (LamApp (LamAbs x t12) t2) = if isValue t2
+eval' :: Exp -> Exp
+eval' (App (Abs x t12) t2) = if isValue t2
                                   then substitute x t2 t12
                                   else let t2' = eval' t2
-                                       in LamApp (LamAbs x t12) t2'
-eval' (LamApp t1 t2) = let t1' = eval' t1
-                        in LamApp t1' t2
+                                       in App (Abs x t12) t2'
+eval' (App t1 t2) = let t1' = eval' t1
+                        in App t1' t2
 eval' t = t
 
-eval :: LamExp -> LamExp
+eval :: Exp -> Exp
 eval t = if t == eval' t then t else eval (eval' t)
