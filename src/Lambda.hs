@@ -1,6 +1,6 @@
 module Lambda where
 
-import Data.List ((\\))
+import Data.List ((\\), elemIndex)
 
 data LamExp
   = LamVar Char
@@ -75,5 +75,45 @@ eval t = if t == eval' t then t else eval (eval' t)
 
 toString :: LamExp -> String
 toString (LamVar name) = [name]
-toString (LamAbs name t) = "(lambda " ++ [name] ++ " . " ++ toString t ++ ")"
+toString (LamAbs name t) = "(λ " ++ [name] ++ " . " ++ toString t ++ ")"
 toString (LamApp s t) = "(" ++ toString s ++ " " ++ toString t ++ ")"
+
+toStringBruijn :: BruijnLamExp -> String
+toStringBruijn (BruijnLamVar index) = show index
+toStringBruijn (BruijnLamAbs t) = "(λ . " ++ toStringBruijn t ++ ")"
+toStringBruijn (BruijnLamApp s t) = "(" ++ toStringBruijn s ++ " " ++ toStringBruijn t ++ ")"
+
+-- Bruijn
+
+-- Para que não seja necessário atualizar os valores quando uma variável entrar em Gamma.
+type Gamma = [Char]
+
+{--
+findIndex :: Char -> Gamma -> Int
+findIndex char gamma = findIndex' char gamma 0
+
+findIndex' :: Char -> Gamma -> Int -> Int
+findIndex' char gamma index
+  | char == last gamma = index
+  | otherwise          = findIndex' char (tail gamma) (succ index)
+--}
+
+removeNames :: LamExp -> Gamma -> BruijnLamExp
+removeNames (LamVar name) gamma = BruijnLamVar index where (Just index) = elemIndex name gamma
+removeNames (LamAbs name t) gamma = BruijnLamAbs $ removeNames t (name:gamma)
+removeNames (LamApp s t) gamma = BruijnLamApp (removeNames s gamma) (removeNames t gamma)
+
+restoreNames :: BruijnLamExp -> Gamma -> LamExp
+restoreNames (BruijnLamVar index) gamma = LamVar $ gamma !! index
+restoreNames (BruijnLamAbs t) gamma = 
+  LamAbs name (restoreNames t $ name:gamma)
+  where name = head $ ['a'..] \\ gamma 
+restoreNames (BruijnLamApp s t) gamma = LamApp (restoreNames s gamma) (restoreNames t gamma)
+
+data BruijnLamExp
+  = BruijnLamVar Int
+  | BruijnLamAbs BruijnLamExp
+  | BruijnLamApp BruijnLamExp BruijnLamExp
+  deriving (Show, Eq)
+
+-- parse com nome -> transforma para sem nome -> eval sem nome -> transforma para com nome

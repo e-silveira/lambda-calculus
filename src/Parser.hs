@@ -2,6 +2,7 @@
 module Parser where
 import Data.Char
 import Lambda
+import Library
 import qualified Data.Array as Happy_Data_Array
 import qualified Data.Bits as Bits
 import Control.Applicative(Applicative(..))
@@ -15,75 +16,107 @@ data HappyAbsSyn t4
 	| HappyAbsSyn4 t4
 
 happyExpList :: Happy_Data_Array.Array Prelude.Int Prelude.Int
-happyExpList = Happy_Data_Array.listArray (0,26) ([16560,512,44,704,27,49216,2,44,0
+happyExpList = Happy_Data_Array.listArray (0,42) ([3056,4,49184,47,0,0,0,0,764,447,0,64516,2,12224,0
 	])
 
 {-# NOINLINE happyExpListPerState #-}
 happyExpListPerState st =
     token_strs_expected
-  where token_strs = ["error","%dummy","%start_parserlamb","Term","lambda","var","'.'","'('","')'","%eof"]
-        bit_start = st Prelude.* 10
-        bit_end = (st Prelude.+ 1) Prelude.* 10
+  where token_strs = ["error","%dummy","%start_parserlamb","Term","lambda","true","false","and","or","var","'.'","'('","')'","%eof"]
+        bit_start = st Prelude.* 14
+        bit_end = (st Prelude.+ 1) Prelude.* 14
         read_bit = readArrayBit happyExpList
         bits = Prelude.map read_bit [bit_start..bit_end Prelude.- 1]
-        bits_indexed = Prelude.zip bits [0..9]
+        bits_indexed = Prelude.zip bits [0..13]
         token_strs_expected = Prelude.concatMap f bits_indexed
         f (Prelude.False, _) = []
         f (Prelude.True, nr) = [token_strs Prelude.!! nr]
 
 action_0 (5) = happyShift action_2
 action_0 (6) = happyShift action_4
-action_0 (8) = happyShift action_5
+action_0 (7) = happyShift action_5
+action_0 (8) = happyShift action_6
+action_0 (9) = happyShift action_7
+action_0 (10) = happyShift action_8
+action_0 (12) = happyShift action_9
 action_0 (4) = happyGoto action_3
 action_0 _ = happyFail (happyExpListPerState 0)
 
 action_1 (5) = happyShift action_2
 action_1 _ = happyFail (happyExpListPerState 1)
 
-action_2 (6) = happyShift action_8
+action_2 (10) = happyShift action_12
 action_2 _ = happyFail (happyExpListPerState 2)
 
 action_3 (5) = happyShift action_2
 action_3 (6) = happyShift action_4
-action_3 (8) = happyShift action_5
-action_3 (10) = happyAccept
-action_3 (4) = happyGoto action_7
+action_3 (7) = happyShift action_5
+action_3 (8) = happyShift action_6
+action_3 (9) = happyShift action_7
+action_3 (10) = happyShift action_8
+action_3 (12) = happyShift action_9
+action_3 (14) = happyAccept
+action_3 (4) = happyGoto action_11
 action_3 _ = happyFail (happyExpListPerState 3)
 
 action_4 _ = happyReduce_4
 
-action_5 (5) = happyShift action_2
-action_5 (6) = happyShift action_4
-action_5 (8) = happyShift action_5
-action_5 (4) = happyGoto action_6
-action_5 _ = happyFail (happyExpListPerState 5)
+action_5 _ = happyReduce_5
 
-action_6 (5) = happyShift action_2
-action_6 (6) = happyShift action_4
-action_6 (8) = happyShift action_5
-action_6 (9) = happyShift action_10
-action_6 (4) = happyGoto action_7
-action_6 _ = happyFail (happyExpListPerState 6)
+action_6 _ = happyReduce_6
 
-action_7 (4) = happyGoto action_7
-action_7 _ = happyReduce_2
+action_7 _ = happyReduce_7
 
-action_8 (7) = happyShift action_9
-action_8 _ = happyFail (happyExpListPerState 8)
+action_8 _ = happyReduce_8
 
 action_9 (5) = happyShift action_2
 action_9 (6) = happyShift action_4
-action_9 (8) = happyShift action_5
-action_9 (4) = happyGoto action_11
+action_9 (7) = happyShift action_5
+action_9 (8) = happyShift action_6
+action_9 (9) = happyShift action_7
+action_9 (10) = happyShift action_8
+action_9 (12) = happyShift action_9
+action_9 (4) = happyGoto action_10
 action_9 _ = happyFail (happyExpListPerState 9)
 
-action_10 _ = happyReduce_3
+action_10 (5) = happyShift action_2
+action_10 (6) = happyShift action_4
+action_10 (7) = happyShift action_5
+action_10 (8) = happyShift action_6
+action_10 (9) = happyShift action_7
+action_10 (10) = happyShift action_8
+action_10 (12) = happyShift action_9
+action_10 (13) = happyShift action_14
+action_10 (4) = happyGoto action_11
+action_10 _ = happyFail (happyExpListPerState 10)
 
-action_11 (5) = happyShift action_2
-action_11 (6) = happyShift action_4
-action_11 (8) = happyShift action_5
-action_11 (4) = happyGoto action_7
-action_11 _ = happyReduce_1
+action_11 (4) = happyGoto action_11
+action_11 _ = happyReduce_2
+
+action_12 (11) = happyShift action_13
+action_12 _ = happyFail (happyExpListPerState 12)
+
+action_13 (5) = happyShift action_2
+action_13 (6) = happyShift action_4
+action_13 (7) = happyShift action_5
+action_13 (8) = happyShift action_6
+action_13 (9) = happyShift action_7
+action_13 (10) = happyShift action_8
+action_13 (12) = happyShift action_9
+action_13 (4) = happyGoto action_15
+action_13 _ = happyFail (happyExpListPerState 13)
+
+action_14 _ = happyReduce_3
+
+action_15 (5) = happyShift action_2
+action_15 (6) = happyShift action_4
+action_15 (7) = happyShift action_5
+action_15 (8) = happyShift action_6
+action_15 (9) = happyShift action_7
+action_15 (10) = happyShift action_8
+action_15 (12) = happyShift action_9
+action_15 (4) = happyGoto action_11
+action_15 _ = happyReduce_1
 
 happyReduce_1 = happyReduce 4 4 happyReduction_1
 happyReduction_1 ((HappyAbsSyn4  happy_var_4) `HappyStk`
@@ -113,27 +146,55 @@ happyReduction_3 _
 happyReduction_3 _ _ _  = notHappyAtAll 
 
 happyReduce_4 = happySpecReduce_1  4 happyReduction_4
-happyReduction_4 (HappyTerminal (TokenVar happy_var_1))
+happyReduction_4 _
+	 =  HappyAbsSyn4
+		 (true
+	)
+
+happyReduce_5 = happySpecReduce_1  4 happyReduction_5
+happyReduction_5 _
+	 =  HappyAbsSyn4
+		 (false
+	)
+
+happyReduce_6 = happySpecReduce_1  4 happyReduction_6
+happyReduction_6 _
+	 =  HappyAbsSyn4
+		 (Library.and
+	)
+
+happyReduce_7 = happySpecReduce_1  4 happyReduction_7
+happyReduction_7 _
+	 =  HappyAbsSyn4
+		 (Library.or
+	)
+
+happyReduce_8 = happySpecReduce_1  4 happyReduction_8
+happyReduction_8 (HappyTerminal (TokenVar happy_var_1))
 	 =  HappyAbsSyn4
 		 (LamVar happy_var_1
 	)
-happyReduction_4 _  = notHappyAtAll 
+happyReduction_8 _  = notHappyAtAll 
 
 happyNewToken action sts stk [] =
-	action 10 10 notHappyAtAll (HappyState action) sts stk []
+	action 14 14 notHappyAtAll (HappyState action) sts stk []
 
 happyNewToken action sts stk (tk:tks) =
 	let cont i = action i i tk (HappyState action) sts stk tks in
 	case tk of {
 	TokenLam -> cont 5;
-	TokenVar happy_dollar_dollar -> cont 6;
-	TokenPoint -> cont 7;
-	TokenOB -> cont 8;
-	TokenCB -> cont 9;
+	TokenTrue -> cont 6;
+	TokenFalse -> cont 7;
+	TokenAnd -> cont 8;
+	TokenOr -> cont 9;
+	TokenVar happy_dollar_dollar -> cont 10;
+	TokenPoint -> cont 11;
+	TokenOB -> cont 12;
+	TokenCB -> cont 13;
 	_ -> happyError' ((tk:tks), [])
 	}
 
-happyError_ explist 10 tk tks = happyError' (tks, explist)
+happyError_ explist 14 tk tks = happyError' (tks, explist)
 happyError_ explist _ tk tks = happyError' ((tk:tks), explist)
 
 newtype HappyIdentity a = HappyIdentity a
@@ -180,6 +241,10 @@ data Token
 	| TokenOB
 	| TokenCB
 	| TokenLam 
+	| TokenTrue
+	| TokenFalse
+	| TokenAnd
+	| TokenOr
 	deriving Show
 
 lexer :: String -> [Token]
@@ -189,9 +254,27 @@ lexer (c:cs)
     | c == '.'  = TokenPoint : lexer cs
     | c == '('  = TokenOB : lexer cs
     | c == ')'  = TokenCB : lexer cs
-    | isAlpha c = 
-		let (a, rest) = span isAlpha (c:cs) in 
-			if (a == "lambda") then TokenLam : lexer rest else (TokenVar c) : lexer rest
+    | isAlpha c = lexWord (c:cs)
+
+lexWord :: String -> [Token]
+lexWord (c:cs)
+	| a == "lambda" = TokenLam : lexer rest
+	| a == "true"   = TokenTrue : lexer rest
+	| a == "false"  = TokenFalse : lexer rest
+	| a == "and"    = TokenAnd : lexer rest
+	| a == "or"     = TokenOr : lexer rest
+	| otherwise     = TokenVar c : lexer rest
+	where (a, rest) = span isAlpha (c:cs)
+-- lexer :: String -> [Token]
+-- lexer [] = []
+-- lexer (c:cs)
+--     | isSpace c = lexer cs
+--     | c == '.'  = TokenPoint : lexer cs
+--     | c == '('  = TokenOB : lexer cs
+--     | c == ')'  = TokenCB : lexer cs
+--     | isAlpha c = 
+-- 		if (a == "lambda") then TokenLam : lexer rest else (TokenVar c) : lexer rest
+-- 		where (a, rest) = span isAlpha (c:cs)
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- $Id: GenericTemplate.hs,v 1.26 2005/01/14 14:47:22 simonmar Exp $
 

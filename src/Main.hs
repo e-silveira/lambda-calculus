@@ -1,6 +1,6 @@
 module Main where
 
-import Lambda (eval, toString)
+import Lambda (eval, toString, toStringBruijn, removeNames)
 import Parser (parserlamb, lexer)
 import System.IO (stdout, hFlush)
 import Control.Monad (unless)
@@ -12,7 +12,7 @@ read' = do
     getLine
 
 eval' :: String -> IO ()
-eval' = putStrLn . toString . eval . parserlamb . lexer
+eval' = putStrLn . toStringBruijn . flip removeNames [] . eval . parserlamb . lexer
 
 main :: IO ()
 main = do
