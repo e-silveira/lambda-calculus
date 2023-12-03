@@ -15,10 +15,6 @@ instance Show Exp where
   show (Abs name t) = "(λ " ++ [name] ++ " . " ++ show t ++ ")"
   show (App s t) = "(" ++ show s ++ " " ++ show t ++ ")"
 
-instance Expression Exp where
-  evalStep :: Exp -> Exp
-  evalStep _ = error "This function should not be called."
-
 {--
   evalStep :: Exp -> Exp
   evalStep (App (Abs x body) arg)
