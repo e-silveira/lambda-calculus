@@ -1,7 +1,7 @@
 module Lambda where
 
-import           Data.List  (elemIndex, (\\))
-import           Expression
+import Data.List (elemIndex, (\\))
+import Expression
 
 data Exp
   = Var Char
@@ -11,9 +11,9 @@ data Exp
 
 instance Show Exp where
   show :: Exp -> String
-  show (Var name)   = [name]
+  show (Var name) = [name]
   show (Abs name t) = "(λ " ++ [name] ++ " . " ++ show t ++ ")"
-  show (App s t)    = "(" ++ show s ++ " " ++ show t ++ ")"
+  show (App s t) = "(" ++ show s ++ " " ++ show t ++ ")"
 
 instance Expression Exp where
   evalStep :: Exp -> Exp
@@ -28,11 +28,10 @@ instance Expression Exp where
   evalStep (App t1 t2) = let t1' = evalStep t1 in App t1' t2
   evalStep t = t
 --}
-
 freeVariables :: Exp -> [Char]
-freeVariables (Var name)   = [name]
+freeVariables (Var name) = [name]
 freeVariables (Abs name t) = freeVariables t \\ [name]
-freeVariables (App s t)    = freeVariables s ++ freeVariables t
+freeVariables (App s t) = freeVariables s ++ freeVariables t
 
 {--
 boundVariables :: Exp -> [Char]
